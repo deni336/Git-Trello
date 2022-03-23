@@ -11,20 +11,23 @@ def getTrelloCard():
     testBoard = client.get_board('5baced22fe21ce0c7b8fb54a')
     boardList = testBoard.get_list('5baced22fe21ce0c7b8fb54b')
     boardCards = boardList.list_cards()
-    cardDesc = boardCards[0].description
-    cardProfile = [boardCards[0].name, cardDesc]
+    cardDesc = boardCards[1].description
+    cardProfile = [boardCards[1].name, cardDesc]
     return cardProfile
 
 def recurringLoop(cardProfile):
     n = 5
-    oldTrelloCard = getTrelloCard
+    oldTrelloCard = getTrelloCard()
     while n > 0:
         newTrelloCard = getTrelloCard()
         if newTrelloCard != oldTrelloCard:
             stringParser(newTrelloCard)
             oldTrelloCard = newTrelloCard
+            githubPush()
+            time.sleep(30.0)
         else:
-            time.sleep(30)
+            time.sleep(30.0)
+    #time.sleep(300)
 
 header = '''<!DOCTYPE html>
     <html>
@@ -38,7 +41,9 @@ header = '''<!DOCTYPE html>
     <body>
         <div class="main">
             <div class="header">
-                <h1 id="title">ViperVision Release Notes</h1></div>'''
+                <h1 id="title">ViperVision Release Notes</h1>
+                </div>
+                <div class="content">'''
 
 def stringParser(newTrelloCard):
     versionTitle = newTrelloCard[0]
@@ -47,20 +52,39 @@ def stringParser(newTrelloCard):
     completedString = ''
     with open("index.html", "r") as od:
         oldData = od.read()
-    if oldData.find(versionTitle) == False:
-        for string in splitString:
-            if string.endswith('.') == True:
+    try:
+        oldVersionTitle = re.findall(versionTitle, oldData)
+        oldVersionTitle1 = oldVersionTitle[0]
+    except:
+        oldVersionTitle1 = "0.0.0.0"
+    if versionTitle != oldVersionTitle1 or None:
+        for string in splitString:            
+            if string.startswith('**') == False:
                 line = "<li>" + string + "</li>"
                 completedString = completedString + line
-            elif string.isspace() == True:
-                pass
             else:
                 head = "<h3>" + string + "</h3>"
                 completedString = completedString + head
-        completedOutput = f'''<div id={versionTitle}><div class="align"><i id="i34" class="fa fa-minus" onclick="makeLittle('collapse-34', 'i34')" aria-hidden="true"></i><h2>ViperVision4.7.13.19</h2></div><ul id="collapse-34" class="active" style="display: block;"> {completedString}</ul></div>'''
+        prevItemId = re.findall("i[0-9][0-9]", oldData)
+        prevItemId = prevItemId[0].replace("i", "")
+        itemId = int(prevItemId) + 1
+        itemId = str(itemId)
+        completedOutput = f'''<div id={versionTitle}><div class="align"><i id="i{itemId}" class="fa fa-minus" onclick="makeLittle('collapse-{itemId}', 'i{itemId}')" aria-hidden="true"></i><h2>ViperVision{versionTitle}</h2></div><ul id="collapse-{itemId}" class="active" style="display: block;"> {completedString}</ul>'''
         oldData = oldData.replace('''style="display: block;"''', "")
         oldData = oldData.replace("minus", "plus")
-        finishedOutput = header + completedOutput + oldData
+        oldData = oldData.replace('''class="active"''', '''class="inactive"''')
+        oldData = oldData.replace('''<div class="content">''', "")
+        splitOldData = re.split("(\</div>)", oldData)
+        splitOldData.pop(0)
+        newOldData = ""
+        oldDataWithoutHeader = newOldData.join(splitOldData)
+        completedOutput = completedOutput.replace("**", "")
+        oldDataWithoutHeader = oldDataWithoutHeader.replace('''if(collapse.style.display == 'none') {
+				collapse.style.display = 'block';
+				operand.setAttribute('class', 'fa fa-plus');''', '''if(collapse.style.display == 'none') {
+				collapse.style.display = 'block';
+				operand.setAttribute('class', 'fa fa-minus');''')
+        finishedOutput = header + completedOutput + oldDataWithoutHeader
         file = open("index.html", "w")
         file.write(finishedOutput)
         file.close
@@ -71,23 +95,29 @@ def stringParser(newTrelloCard):
         newOldData = ""
         oldDataWithoutPreviousVersion = newOldData.join(splitOldData)
         for string in splitString:
-            if string.endswith('.') == True:
+            if string.startswith('**') == False:
                 line = "<li>" + string + "</li>\n"
                 completedString = completedString + line
-            elif string == "":
-                pass
             else:
                 head = "<h3>" + string + "</h3>\n"
                 completedString = completedString + head
-        completedOutput = f'''<div id="{versionTitle}"><div class="align"><i id="i34" class="fa fa-minus" onclick="makeLittle('collapse-34', 'i34')" aria-hidden="true"></i><h2>ViperVision4.7.13.19</h2></div><ul id="collapse-34" class="active" style="display: block;"> {completedString}</ul></div>'''
+        completedOutput = f'''<div id="{versionTitle}"><div class="align"><i id="i34" class="fa fa-minus" onclick="makeLittle('collapse-34', 'i34')" aria-hidden="true"></i><h2>ViperVision{versionTitle}</h2></div><ul id="collapse-34" class="active" style="display: block;"> {completedString}</ul>'''
         oldData = oldData.replace('''style="display: block;"''', "")
         oldData = oldData.replace("minus", "plus")
-        
+        completedOutput = completedOutput.replace("**", "")
+        oldDataWithoutPreviousVersion = oldDataWithoutPreviousVersion.replace('''if(collapse.style.display == 'none') {
+				collapse.style.display = 'block';
+				operand.setAttribute('class', 'fa fa-plus');''', '''if(collapse.style.display == 'none') {
+				collapse.style.display = 'block';
+				operand.setAttribute('class', 'fa fa-minus');''')
         finishedOutput = header + completedOutput + oldDataWithoutPreviousVersion
         file = open("index.html", "w")
         file.write(finishedOutput)
         file.close
-        githubPush()
+        file1 = open("indexbackup.html", "w")
+        file1.write(finishedOutput)
+        file.close
+    return
 
 def githubPush():
     g = Github("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")
@@ -111,7 +141,7 @@ def githubPush():
     else:
         repo.create_file(git_file, "committing files", content, branch="main")
         print(git_file + ' CREATED')
-githubPush()
+    return
+
 recurringLoop(getTrelloCard())
-    
 

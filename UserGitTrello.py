@@ -1,4 +1,5 @@
 import re
+from string import whitespace
 from trello import TrelloClient
 from github import Github
 import time
@@ -58,13 +59,14 @@ def stringParser(newTrelloCard):
     except:
         oldVersionTitle1 = "0.0.0.0"
     if versionTitle != oldVersionTitle1 or None:
-        for string in splitString:            
-            if string.startswith('**') == False:
-                line = "<li>" + string + "</li>"
-                completedString = completedString + line
-            else:
+        for string in splitString:
+            if string.startswith('**') == True:
                 head = "<h3>" + string + "</h3>"
                 completedString = completedString + head
+            elif string.startswith('**') == False:
+                line = "<li>" + string + "</li>"
+                completedString = completedString + line
+
         prevItemId = re.findall("i[0-9][0-9]", oldData)
         prevItemId = prevItemId[0].replace("i", "")
         itemId = int(prevItemId) + 1
@@ -79,6 +81,7 @@ def stringParser(newTrelloCard):
         newOldData = ""
         oldDataWithoutHeader = newOldData.join(splitOldData)
         completedOutput = completedOutput.replace("**", "")
+        completedOutput = completedOutput.replace("<li></li>", "")
         oldDataWithoutHeader = oldDataWithoutHeader.replace('''if(collapse.style.display == 'none') {
 				collapse.style.display = 'block';
 				operand.setAttribute('class', 'fa fa-plus');''', '''if(collapse.style.display == 'none') {
@@ -95,12 +98,13 @@ def stringParser(newTrelloCard):
         newOldData = ""
         oldDataWithoutPreviousVersion = newOldData.join(splitOldData)
         for string in splitString:
-            if string.startswith('**') == False:
-                line = "<li>" + string + "</li>\n"
-                completedString = completedString + line
-            else:
+            if string.startswith('**') == True:
                 head = "<h3>" + string + "</h3>\n"
                 completedString = completedString + head
+            elif string.startswith('**') == False:
+                line = "<li>" + string + "</li>\n"
+                completedString = completedString + line
+
         completedOutput = f'''<div id="{versionTitle}"><div class="align"><i id="i34" class="fa fa-minus" onclick="makeLittle('collapse-34', 'i34')" aria-hidden="true"></i><h2>ViperVision{versionTitle}</h2></div><ul id="collapse-34" class="active" style="display: block;"> {completedString}</ul>'''
         oldData = oldData.replace('''style="display: block;"''', "")
         oldData = oldData.replace("minus", "plus")

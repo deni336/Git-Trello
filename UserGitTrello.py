@@ -1,5 +1,4 @@
 import re
-from string import whitespace
 from trello import TrelloClient
 from github import Github
 import time
@@ -66,7 +65,6 @@ def stringParser(newTrelloCard):
             elif string.startswith('**') == False:
                 line = "<li>" + string + "</li>"
                 completedString = completedString + line
-
         prevItemId = re.findall("i[0-9][0-9]", oldData)
         prevItemId = prevItemId[0].replace("i", "")
         itemId = int(prevItemId) + 1
@@ -104,7 +102,6 @@ def stringParser(newTrelloCard):
             elif string.startswith('**') == False:
                 line = "<li>" + string + "</li>\n"
                 completedString = completedString + line
-
         completedOutput = f'''<div id="{versionTitle}"><div class="align"><i id="i34" class="fa fa-minus" onclick="makeLittle('collapse-34', 'i34')" aria-hidden="true"></i><h2>ViperVision{versionTitle}</h2></div><ul id="collapse-34" class="active" style="display: block;"> {completedString}</ul>'''
         oldData = oldData.replace('''style="display: block;"''', "")
         oldData = oldData.replace("minus", "plus")

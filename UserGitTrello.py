@@ -3,13 +3,13 @@ from trello import TrelloClient
 from github import Github
 import time
 
-client = TrelloClient(api_key='4cd5173d5fbf8dceb732ac54a410e406',
-                    api_secret='f5c1b76a7357592163e84cf2d6b3cd5f4e8efb8b98e37125f64adb4400814383',
-                    token='4326574bb0721e0194c3d977df9c592fb1f2ba8808707bd8d1efbc4fbcdb173d')
+client = TrelloClient(api_key='',
+                    api_secret='',
+                    token='')
 
 def getTrelloCard():    
-    testBoard = client.get_board('5baced22fe21ce0c7b8fb54a')
-    boardList = testBoard.get_list('5baced22fe21ce0c7b8fb54b')
+    testBoard = client.get_board('')
+    boardList = testBoard.get_list('')
     boardCards = boardList.list_cards()
     cardDesc = boardCards[1].description
     cardProfile = [boardCards[1].name, cardDesc]
